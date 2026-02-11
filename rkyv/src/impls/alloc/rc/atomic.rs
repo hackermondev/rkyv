@@ -1,4 +1,4 @@
-use core::alloc::LayoutError;
+use core::{alloc::LayoutError, cmp};
 
 use ptr_meta::{from_raw_parts_mut, Pointee};
 use rancor::{Fallible, Source};
@@ -99,6 +99,16 @@ where
 {
     fn eq(&self, other: &sync::Arc<U>) -> bool {
         self.get().eq(other.as_ref())
+    }
+}
+
+impl<T, U> PartialOrd<sync::Arc<U>> for ArchivedRc<T, ArcFlavor>
+where
+    T: ArchivePointee + PartialOrd<U> + ?Sized,
+    U: ?Sized,
+{
+    fn partial_cmp(&self, other: &sync::Arc<U>) -> Option<cmp::Ordering> {
+        self.get().partial_cmp(other.as_ref())
     }
 }
 
